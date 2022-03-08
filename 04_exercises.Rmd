@@ -95,14 +95,81 @@ These exercises will reiterate what you learned in the "Mapping data with R" tut
 ### Starbucks locations (`ggmap`)
 
   1. Add the `Starbucks` locations to a world map. Add an aesthetic to the world map that sets the color of the points according to the ownership type. What, if anything, can you deduce from this visualization?  
+  
+```{r}
+world_map <- get_stamenmap(
+    bbox = c(left = -180, bottom = -57, right = 179, top = 82.1), 
+    maptype = "toner",
+    zoom = 2)
 
-  2. Construct a new map of Starbucks locations in the Twin Cities metro area (approximately the 5 county metro area).  
+ggmap(world_map) +
+  geom_point(data = Starbucks, 
+             aes(x = Longitude, y = Latitude, color = `Ownership Type`), 
+             alpha = .3, 
+             size = .1) +
+  theme_map() + 
+  labs(title = "Starbucks Locations Worldwide")
+```
+
+  2. Construct a new map of Starbucks locations in the Twin Cities metro area (approximately the 5 county metro area).
+  
+```{r}
+twin_cities_map <- get_stamenmap(
+    bbox = c(left = -94.01, bottom = 44.47, right = -92.73, top = 45.42), 
+    maptype = "toner",
+    zoom = 10)
+
+ggmap(twin_cities_map) +
+  geom_point(data = Starbucks, aes(x = Longitude, y = Latitude), alpha = .3, size = 1, color = "red") +
+  theme_map() + 
+  labs(title = "Starbucks Locations in the Twin Cities Metro Area")
+```
 
   3. In the Twin Cities plot, play with the zoom number. What does it do?  (just describe what it does - don't actually include more than one map).  
+  
+```{r}
+twin_cities_map <- get_stamenmap(
+    bbox = c(left = -94.01, bottom = 44.47, right = -92.73, top = 45.42), 
+    maptype = "toner",
+    zoom = 8)
+
+ggmap(twin_cities_map) +
+  geom_point(data = Starbucks, aes(x = Longitude, y = Latitude), alpha = .3, size = 1, color = "red") +
+  theme_map() + 
+  labs(title = "Starbucks Locations in the Twin Cities Metro Area")
+```
+
+The zoom controls how much detail we see in our map. Smaller zoom number = less detail.
 
   4. Try a couple different map types (see `get_stamenmap()` in help and look at `maptype`). Include a map with one of the other map types.  
+  
+```{r}
+twin_cities_map <- get_stamenmap(
+    bbox = c(left = -94.01, bottom = 44.47, right = -92.73, top = 45.42), 
+    maptype = "watercolor",
+    zoom = 10)
+
+ggmap(twin_cities_map) +
+  geom_point(data = Starbucks, aes(x = Longitude, y = Latitude), alpha = .8, size = 1, color = "black") +
+  theme_map() + 
+  labs(title = "Starbucks Locations in the Twin Cities Metro Area")
+```
 
   5. Add a point to the map that indicates Macalester College and label it appropriately. There are many ways you can do think, but I think it's easiest with the `annotate()` function (see `ggplot2` cheatsheet).
+  
+```{r}
+twin_cities_map <- get_stamenmap(
+    bbox = c(left = -94.01, bottom = 44.47, right = -92.73, top = 45.42), 
+    maptype = "toner",
+    zoom = 10)
+
+ggmap(twin_cities_map) +
+  geom_point(data = Starbucks, aes(x = Longitude, y = Latitude), alpha = .3, size = 1, color = "red") +
+  geom_point(aes(x = -93.1691, y = 44.9379), color = "blue", size = 1.5, alpha = .5) +
+  annotate("text", x = -93.1691, y = 44.9259, label = "Macalester College", color = "blue", size = 2.4) +
+  theme_map() + 
+  labs(title = "Starbucks Locations in the Twin Cities Metro Area")
+```
 
 ### Choropleth maps with Starbucks data (`geom_map()`)
 
@@ -123,7 +190,29 @@ starbucks_with_2018_pop_est <-
 
   6. **`dplyr` review**: Look through the code above and describe what each line of code does.
 
+Line 1: Read in csv file from url
+Line 2: Separates the state variable into two different variables: state name and the dot before the state name
+Line 3: Removes the dot variable from the data set
+Line 4: Puts the state name into lowercase
+
+Line 5: Establishes name of new data set we are creating
+Line 6: Get initial info from existing starsbucks_us_by_state data set
+Line 7: Left join with census_pop_est_2018 data set
+Line 8: Joins by state, clarifying that the state in the census_pop_est_2018 corresponds to the state_name in starsbucks_us_by_state
+Line 9: Adds a new variable, starbucks_per_10000, which divides the number of Starbucks in the state by the state population
+
   7. Create a choropleth map that shows the number of Starbucks per 10,000 people on a map of the US. Use a new fill color, add points for all Starbucks in the US (except Hawaii and Alaska), add an informative title for the plot, and include a caption that says who created the plot (you!). Make a conclusion about what you observe.
+  
+```{r}
+states_map <- map_data("state")
+
+starbucks_with_2018_pop_est %>%
+  ggplot() +
+  geom_map(map = states_map, aes(map_id = state_name, fill = starbucks_per_10000)) +
+  expand_limits(x = states_map$long, y = states_map$lat) + 
+  theme_map() +
+  labs(title = "Stabucks per 10000 People in the US")
+```
 
 ### A few of your favorite things (`leaflet`)
 
@@ -136,7 +225,28 @@ starbucks_with_2018_pop_est <-
   * Connect all your locations together with a line in a meaningful way (you may need to order them differently in the original data).  
   
   * If there are other variables you want to add that could enhance your plot, do that now.  
-  
+
+```{r}
+jasons_ski_mountains <- tibble(
+  place = c("Snowmass", "Alta", "Snowbird", "Deer Valley", "Jay Peak", "Park City", "Mt Hood", "Stowe", "Jackson Hole", "Whistler-Blackomb", "Northstar"),
+  long = c(-106.984827, -111.638581, -111.656832, -111.478306, -72.504772, -111.507995, -121.665185, -72.781437, -110.827918, -122.948647, -120.121093),
+  lat = c(39.331027, 40.588422, 40.581020, 40.637380, 44.937901, 40.651420, 45.331755, 44.530289, 43.587545, 50.114964, 39.274568),
+  fav = c(TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, FALSE)
+  )
+
+pal <- colorFactor(palette = c("red", "green"),
+  domain = jasons_ski_mountains$fav
+)
+```
+
+```{r}
+leaflet(data = jasons_ski_mountains) %>%
+  addProviderTiles(providers$Stamen.Toner) %>%
+  addPolylines(lng = ~long, lat = ~lat, color = "yellow") %>%
+  addCircles(lng = ~long, lat = ~lat, label = ~place, weight = 10, opacity = 1, color = ~pal(fav))
+```
+
+
 ## Revisiting old datasets
 
 This section will revisit some datasets we have used previously and bring in a mapping component. 

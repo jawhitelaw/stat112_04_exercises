@@ -228,14 +228,14 @@ starbucks_with_2018_pop_est %>%
 
 ```{r}
 jasons_ski_mountains <- tibble(
-  place = c("Snowmass", "Alta", "Snowbird", "Deer Valley", "Jay Peak", "Park City", "Mt Hood", "Stowe", "Jackson Hole", "Whistler-Blackomb", "Northstar"),
-  long = c(-106.984827, -111.638581, -111.656832, -111.478306, -72.504772, -111.507995, -121.665185, -72.781437, -110.827918, -122.948647, -120.121093),
-  lat = c(39.331027, 40.588422, 40.581020, 40.637380, 44.937901, 40.651420, 45.331755, 44.530289, 43.587545, 50.114964, 39.274568),
-  fav = c(TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, FALSE)
+  place = c("Snowmass", "Alta", "Snowbird", "Deer Valley", "Jay Peak", "Buttermilk", "Park City", "Mt Hood", "Stowe", "Jackson Hole", "Whistler-Blackomb", "Northstar"),
+  long = c(-106.984827, -111.638581, -111.656832, -111.478306, -72.504772, -106.861069, -111.507995, -121.665185, -72.781437, -110.827918, -122.948647, -120.121093),
+  lat = c(39.331027, 40.588422, 40.581020, 40.637380, 44.937901, 39.205803, 40.651420, 45.331755, 44.530289, 43.587545, 50.114964, 39.274568),
+  `Top 3 Favorite Mountains` = c(TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, FALSE)
   )
 
 pal <- colorFactor(palette = c("red", "green"),
-  domain = jasons_ski_mountains$fav
+  domain = jasons_ski_mountains$`Top 3 Favorite Mountains`
 )
 ```
 
@@ -243,7 +243,8 @@ pal <- colorFactor(palette = c("red", "green"),
 leaflet(data = jasons_ski_mountains) %>%
   addProviderTiles(providers$Stamen.Toner) %>%
   addPolylines(lng = ~long, lat = ~lat, color = "yellow") %>%
-  addCircles(lng = ~long, lat = ~lat, label = ~place, weight = 10, opacity = 1, color = ~pal(fav))
+  addCircles(lng = ~long, lat = ~lat, label = ~place, weight = 10, opacity = 1, color = ~pal(`Top 3 Favorite Mountains`)) %>%
+  addLegend("bottomright", pal = pal, values = ~`Top 3 Favorite Mountains`)
 ```
 
 

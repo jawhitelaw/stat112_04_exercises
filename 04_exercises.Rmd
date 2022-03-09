@@ -415,9 +415,22 @@ The neighborhoods in south-east Minneapolis tend to have a much higher proportio
   18. Use `leaflet` to create a map of your own choosing. Come up with a question you want to try to answer and use the map to help answer that question. Describe what your map shows. 
   
 ```{r}
+mpls_race <- MplsStops %>%
+  filter(!is.na(race)) %>%
+  filter(race != "Unknown") %>%
+  filter(problem == "suspicious")
 
+pal <- colorFactor(palette = c("red", "magenta", "purple", "blue", "cyan", "green", "yellow"),
+  domain = mpls_race$race
+)
+
+leaflet(data = mpls_race) %>%
+  addProviderTiles(providers$Stamen.Toner) %>%
+  addCircles(lng = ~long, lat = ~lat, weight = 20, opacity = 5, stroke = FALSE, color = ~pal(race)) %>%
+  addLegend("bottomright", pal = pal, values = ~race)
 ```
 
+What were the races of people in known suspicious stops and how are those races distributed accross Minneapolis? This map shows the race of each suspicious stop where the race was known.
   
 ## GitHub link
 
